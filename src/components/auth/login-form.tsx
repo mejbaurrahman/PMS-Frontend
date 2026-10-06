@@ -7,6 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import { loginSchema, type LoginFormValues } from "@/lib/validations/auth";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
+import { loginUser } from "@/lib/auth-api";
+import { ROLE_DASHBOARD_PATHS } from "@/lib/constants";
 
 export default function LoginForm() {
   const {
@@ -22,9 +28,26 @@ export default function LoginForm() {
   });
 
   const onSubmit = (values: LoginFormValues) => {
-    console.log(values);
+    console.log("hello");
+    loginMutation.mutate(values);
   };
+  const router = useRouter();
 
+  const loginMutation = useMutation({
+    mutationFn: loginUser,
+
+    onSuccess: (response) => {
+      toast.success(response.message);
+
+      const role = response.data.user.role;
+
+      router.push(ROLE_DASHBOARD_PATHS[role]);
+    },
+
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div className="space-y-2">
@@ -61,8 +84,12 @@ export default function LoginForm() {
         )}
       </div>
 
-      <Button type="submit" className="w-full">
-        Login
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={loginMutation.isPending}
+      >
+        {loginMutation.isPending ? "Logging in..." : "Login"}
       </Button>
     </form>
   );
