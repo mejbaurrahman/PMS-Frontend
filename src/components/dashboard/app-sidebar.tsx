@@ -1,27 +1,21 @@
 import Link from "next/link";
-import {
-  LayoutDashboard,
-  FolderKanban,
-  Users,
-  ListTodo,
-  Settings,
-} from "lucide-react";
+import type { UserRole } from "@/types/user";
+import { roleNavigation } from "@/lib/navigation";
 
-const navigation = [
-  { title: "Dashboard", href: "/manager", icon: LayoutDashboard },
-  { title: "Projects", href: "/manager/projects", icon: FolderKanban },
-  { title: "Teams", href: "/manager/teams", icon: Users },
-  { title: "Tasks", href: "/manager/tasks", icon: ListTodo },
-  { title: "Settings", href: "/manager/settings", icon: Settings },
-];
+interface AppSidebarProps {
+  role: UserRole;
+}
 
-export default function AppSidebar() {
+export default function AppSidebar({ role }: AppSidebarProps) {
+  const navigation = roleNavigation[role];
+
   return (
     <aside className="hidden min-h-screen w-64 shrink-0 border-r bg-background md:block">
       <div className="border-b p-6">
         <Link href="/" className="text-2xl font-bold">
           PMS
         </Link>
+
         <p className="mt-1 text-xs text-muted-foreground">
           Project Management SaaS
         </p>
