@@ -10,3 +10,9 @@ export function loginUser(payload: LoginInput) {
 export function getMe() {
   return apiFetch<ApiResponse<User>>("/auth/me");
 }
+
+export function logoutUser() {
+  return apiFetch<ApiResponse<null>>("/auth/logout", {
+    method: "POST",
+  });
+}

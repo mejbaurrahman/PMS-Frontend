@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { ROLE_DASHBOARD_PATHS } from "@/lib/constants";
 import { ApiError } from "@/lib/api";
 import { usePathname, useRouter } from "next/navigation";
+import LogoutButton from "@/components/dashboard/logout-button";
 export default function DashboardShell({
   children,
 }: {
@@ -59,10 +60,14 @@ export default function DashboardShell({
             <h1 className="font-semibold">PMS Dashboard</h1>
           </div>
 
-          <div className="text-right">
-            <p className="text-sm font-medium">{user.name}</p>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <p className="text-sm font-medium">{user.name}</p>
 
-            <p className="text-xs text-muted-foreground">{user.role}</p>
+              <p className="text-xs text-muted-foreground">{user.role}</p>
+            </div>
+
+            <LogoutButton />
           </div>
         </header>
 
