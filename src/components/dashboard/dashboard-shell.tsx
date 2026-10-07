@@ -7,6 +7,7 @@ import { ROLE_DASHBOARD_PATHS } from "@/lib/constants";
 import { ApiError } from "@/lib/api";
 import { usePathname, useRouter } from "next/navigation";
 import LogoutButton from "@/components/dashboard/logout-button";
+import DashboardSkeleton from "@/components/dashboard/dashboard-skeleton";
 export default function DashboardShell({
   children,
 }: {
@@ -22,11 +23,7 @@ export default function DashboardShell({
     }
   }, [isError, error, router]);
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        Loading dashboard...
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (isError || !data?.data) {
