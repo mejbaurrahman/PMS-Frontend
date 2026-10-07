@@ -13,6 +13,8 @@ import { toast } from "sonner";
 
 import { loginUser } from "@/lib/auth-api";
 import { ROLE_DASHBOARD_PATHS } from "@/lib/constants";
+import type { UserRole } from "@/types/user";
+import { DEMO_CREDENTIALS } from "@/lib/constants";
 
 export default function LoginForm() {
   const {
@@ -26,7 +28,11 @@ export default function LoginForm() {
       password: "",
     },
   });
+  const handleDemoLogin = (role: UserRole) => {
+    const credentials = DEMO_CREDENTIALS[role];
 
+    loginMutation.mutate(credentials);
+  };
   const onSubmit = (values: LoginFormValues) => {
     console.log("hello");
     loginMutation.mutate(values);
@@ -91,6 +97,48 @@ export default function LoginForm() {
       >
         {loginMutation.isPending ? "Logging in..." : "Login"}
       </Button>
+      <div className="space-y-3 pt-4">
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              Demo Login
+            </span>
+          </div>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-3">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={loginMutation.isPending}
+            onClick={() => handleDemoLogin("ADMIN")}
+          >
+            Admin
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            disabled={loginMutation.isPending}
+            onClick={() => handleDemoLogin("MANAGER")}
+          >
+            Manager
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            disabled={loginMutation.isPending}
+            onClick={() => handleDemoLogin("MEMBER")}
+          >
+            Member
+          </Button>
+        </div>
+      </div>
     </form>
   );
 }
