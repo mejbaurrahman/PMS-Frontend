@@ -2,14 +2,24 @@
 
 import AppSidebar from "@/components/dashboard/app-sidebar";
 import { useAuth } from "@/hooks/use-auth";
-
+import { useEffect } from "react";
+import { ROLE_DASHBOARD_PATHS } from "@/lib/constants";
+import { ApiError } from "@/lib/api";
+import { usePathname, useRouter } from "next/navigation";
 export default function DashboardShell({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { data, isLoading, isError } = useAuth();
+  const { data, isLoading, isError, error } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
 
+  useEffect(() => {
+    if (isError && error instanceof ApiError && error.status === 401) {
+      router.replace("/login");
+    }
+  }, [isError, error, router]);
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -21,12 +31,23 @@ export default function DashboardShell({
   if (isError || !data?.data) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        Unable to load user.
+        Checking authentication...
       </div>
     );
   }
 
   const user = data.data;
+  const allowedPrefix = ROLE_DASHBOARD_PATHS[user.role];
+
+  if (!pathname.startsWith(allowedPrefix)) {
+    router.replace(allowedPrefix);
+
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        Redirecting to your dashboard...
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-background">
