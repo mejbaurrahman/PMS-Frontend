@@ -4,6 +4,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
+import { registerUser } from "@/lib/auth-api";
 import { Input } from "@/components/ui/input";
 
 import {
@@ -24,9 +29,25 @@ export default function RegisterForm() {
       password: "",
     },
   });
+  const router = useRouter();
 
+  const registerMutation = useMutation({
+    mutationFn: registerUser,
+
+    onSuccess: (response) => {
+      toast.success(response.message);
+
+      const email = response.data.email;
+
+      router.push(`/verify-register-otp?email=${encodeURIComponent(email)}`);
+    },
+
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
   const onSubmit = (values: RegisterFormValues) => {
-    console.log(values);
+    registerMutation.mutate(values);
   };
 
   return (
@@ -77,8 +98,12 @@ export default function RegisterForm() {
         )}
       </div>
 
-      <Button type="submit" className="w-full">
-        Create Account
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={registerMutation.isPending}
+      >
+        {registerMutation.isPending ? "Sending OTP..." : "Create Account"}
       </Button>
     </form>
   );
