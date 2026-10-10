@@ -1,5 +1,5 @@
 import Link from "next/link";
-
+import RegisterForm from "@/components/auth/register-form";
 export default function RegisterPage() {
   return (
     <div className="space-y-6">
@@ -10,7 +10,7 @@ export default function RegisterPage() {
           Join PMS to manage projects and collaborate with your team.
         </p>
       </div>
-
+      <RegisterForm />
       <p className="text-center text-sm text-muted-foreground">
         Already have an account?{" "}
         <Link
