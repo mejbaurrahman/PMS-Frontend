@@ -38,11 +38,11 @@ export default function DashboardShell({
   const allowedPrefix = ROLE_DASHBOARD_PATHS[user.role];
 
   if (!pathname.startsWith(allowedPrefix)) {
-    router.replace(allowedPrefix);
+    router.replace("/unauthorized");
 
     return (
       <div className="flex min-h-screen items-center justify-center">
-        Redirecting to your dashboard...
+        Checking permissions...
       </div>
     );
   }
