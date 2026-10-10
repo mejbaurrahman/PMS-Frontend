@@ -28,6 +28,8 @@ export default function LoginForm() {
       password: "",
     },
   });
+
+};
   const handleDemoLogin = (role: UserRole) => {
     const credentials = DEMO_CREDENTIALS[role];
 
