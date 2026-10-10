@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-
+import ProjectListClient from "@/components/project/project-list-client";
 export default function ManagerProjectsPage() {
   return (
     <section className="space-y-6">
