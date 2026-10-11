@@ -15,11 +15,7 @@ export default function ManagerProjectsPage() {
         <Button>Create Project</Button>
       </div>
 
-      <div className="rounded-lg border p-6">
-        <p className="text-sm text-muted-foreground">
-          Project data will appear here.
-        </p>
-      </div>
+      <ProjectListClient />
     </section>
   );
 }
