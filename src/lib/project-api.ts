@@ -1,14 +1,28 @@
 import { apiFetch } from "@/lib/api";
-import type { ProjectListResponse, ProjectStatus } from "@/types/project";
+
+import type { ApiResponse } from "@/types/auth";
+
+import type {
+  Project,
+  ProjectListResponse,
+  ProjectStatus,
+} from "@/types/project";
+
+import type { CreateProjectInput } from "@/lib/validations/project";
 
 export interface ProjectQueryParams {
   page?: number;
   limit?: number;
+
   status?: ProjectStatus;
+
   organizationId?: string;
   teamId?: string;
+
   search?: string;
+
   sortBy?: "createdAt" | "updatedAt" | "name" | "startDate" | "endDate";
+
   sortOrder?: "asc" | "desc";
 }
 
@@ -50,4 +64,32 @@ export function getProjects(params: ProjectQueryParams = {}) {
   const query = searchParams.toString();
 
   return apiFetch<ProjectListResponse>(`/projects${query ? `?${query}` : ""}`);
+}
+
+export function getProjectById(projectId: string) {
+  return apiFetch<ApiResponse<Project>>(`/projects/${projectId}`);
+}
+
+export function createProject(payload: CreateProjectInput) {
+  const body = {
+    name: payload.name,
+    description: payload.description || undefined,
+
+    organizationId: payload.organizationId,
+
+    teamId: payload.teamId,
+
+    startDate: payload.startDate
+      ? new Date(`${payload.startDate}T00:00:00.000Z`).toISOString()
+      : undefined,
+
+    endDate: payload.endDate
+      ? new Date(`${payload.endDate}T00:00:00.000Z`).toISOString()
+      : undefined,
+  };
+
+  return apiFetch<ApiResponse<Project>>("/projects", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
 }

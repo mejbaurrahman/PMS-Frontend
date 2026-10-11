@@ -4,6 +4,22 @@ export type ProjectStatus =
   | "ON_HOLD"
   | "COMPLETED"
   | "ARCHIVED";
+
+export interface ProjectOrganization {
+  id: string;
+  name: string;
+}
+
+export interface ProjectTeam {
+  id: string;
+  name: string;
+}
+
+export interface ProjectCount {
+  tasks: number;
+  sprints?: number;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -18,6 +34,11 @@ export interface Project {
 
   createdAt: string;
   updatedAt: string;
+
+  organization?: ProjectOrganization;
+  team?: ProjectTeam;
+
+  _count?: ProjectCount;
 }
 
 export interface PaginationMeta {

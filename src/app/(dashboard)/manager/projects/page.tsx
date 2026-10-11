@@ -1,5 +1,10 @@
+import Link from "next/link";
+import { Plus } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+
 import ProjectListClient from "@/components/project/project-list-client";
+
 export default function ManagerProjectsPage() {
   return (
     <section className="space-y-6">
@@ -12,7 +17,13 @@ export default function ManagerProjectsPage() {
           </p>
         </div>
 
-        <Button>Create Project</Button>
+        <Button
+          nativeButton={false}
+          render={<Link href="/manager/projects/new" />}
+        >
+          <Plus className="size-4" />
+          Create Project
+        </Button>
       </div>
 
       <ProjectListClient />
