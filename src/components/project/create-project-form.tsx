@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -21,14 +22,33 @@ import {
   type CreateProjectInput,
 } from "@/lib/validations/project";
 
+import { useOrganizations } from "@/hooks/use-organizations";
+
+import { useTeams } from "@/hooks/use-teams";
+
 export default function CreateProjectForm() {
   const router = useRouter();
 
   const queryClient = useQueryClient();
 
   const {
+    data: organizationResponse,
+    isLoading: organizationsLoading,
+    isError: organizationsError,
+  } = useOrganizations();
+
+  const {
+    data: teamResponse,
+    isLoading: teamsLoading,
+    isError: teamsError,
+  } = useTeams();
+
+  const {
     register,
     handleSubmit,
+    control,
+    setValue,
+
     formState: { errors },
   } = useForm<CreateProjectInput>({
     resolver: zodResolver(createProjectSchema),
@@ -42,6 +62,25 @@ export default function CreateProjectForm() {
       endDate: "",
     },
   });
+
+  const selectedOrganizationId = useWatch({
+    control,
+    name: "organizationId",
+  });
+
+  const organizations = organizationResponse?.data ?? [];
+
+  const teams = teamResponse?.data ?? [];
+
+  const filteredTeams = useMemo(() => {
+    if (!selectedOrganizationId) {
+      return [];
+    }
+
+    return teams.filter(
+      (team) => team.organizationId === selectedOrganizationId,
+    );
+  }, [teams, selectedOrganizationId]);
 
   const createMutation = useMutation({
     mutationFn: createProject,
@@ -65,6 +104,21 @@ export default function CreateProjectForm() {
 
   const onSubmit = (values: CreateProjectInput) => {
     createMutation.mutate(values);
+  };
+
+  const handleOrganizationChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const organizationId = event.target.value;
+
+    setValue("organizationId", organizationId, {
+      shouldValidate: true,
+    });
+
+    // Reset team whenever organization changes.
+    setValue("teamId", "", {
+      shouldValidate: true,
+    });
   };
 
   return (
@@ -110,19 +164,34 @@ export default function CreateProjectForm() {
       {/* Organization */}
       <div className="space-y-2">
         <label htmlFor="organizationId" className="text-sm font-medium">
-          Organization ID
+          Organization
         </label>
 
-        <Input
+        <select
           id="organizationId"
-          placeholder="Enter organization ID"
           {...register("organizationId")}
-        />
+          onChange={handleOrganizationChange}
+          disabled={organizationsLoading}
+          className="h-10 w-full rounded-md border bg-background px-3 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <option value="">
+            {organizationsLoading
+              ? "Loading organizations..."
+              : "Select organization"}
+          </option>
 
-        <p className="text-xs text-muted-foreground">
-          The project must belong to an organization where you are an Owner or
-          Manager.
-        </p>
+          {organizations.map((organization) => (
+            <option key={organization.id} value={organization.id}>
+              {organization.name}
+            </option>
+          ))}
+        </select>
+
+        {organizationsError && (
+          <p className="text-sm text-destructive">
+            Unable to load organizations.
+          </p>
+        )}
 
         {errors.organizationId && (
           <p className="text-sm text-destructive">
@@ -134,18 +203,41 @@ export default function CreateProjectForm() {
       {/* Team */}
       <div className="space-y-2">
         <label htmlFor="teamId" className="text-sm font-medium">
-          Team ID
+          Team
         </label>
 
-        <Input
+        <select
           id="teamId"
-          placeholder="Enter team ID"
           {...register("teamId")}
-        />
+          disabled={!selectedOrganizationId || teamsLoading}
+          className="h-10 w-full rounded-md border bg-background px-3 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <option value="">
+            {!selectedOrganizationId
+              ? "Select organization first"
+              : teamsLoading
+                ? "Loading teams..."
+                : "Select team"}
+          </option>
 
-        <p className="text-xs text-muted-foreground">
-          The selected team must belong to the selected organization.
-        </p>
+          {filteredTeams.map((team) => (
+            <option key={team.id} value={team.id}>
+              {team.name}
+            </option>
+          ))}
+        </select>
+
+        {teamsError && (
+          <p className="text-sm text-destructive">Unable to load teams.</p>
+        )}
+
+        {selectedOrganizationId &&
+          !teamsLoading &&
+          filteredTeams.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              No teams found for this organization.
+            </p>
+          )}
 
         {errors.teamId && (
           <p className="text-sm text-destructive">{errors.teamId.message}</p>
@@ -191,7 +283,12 @@ export default function CreateProjectForm() {
           Cancel
         </Button>
 
-        <Button type="submit" disabled={createMutation.isPending}>
+        <Button
+          type="submit"
+          disabled={
+            createMutation.isPending || organizationsLoading || teamsLoading
+          }
+        >
           {createMutation.isPending ? "Creating..." : "Create Project"}
         </Button>
       </div>
