@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 
 import ProjectStatusBadge from "@/components/project/project-status-badge";
 
+import ProjectStatusControl from "@/components/project/project-status-control";
+
 import ProjectListSkeleton from "@/components/project/project-list-skeleton";
 
 import { useProject } from "@/hooks/use-project";
@@ -138,6 +140,12 @@ export default function ProjectDetailsClient({
           </p>
         </div>
       </div>
+
+      {/* Status Update */}
+      <ProjectStatusControl
+        projectId={project.id}
+        currentStatus={project.status}
+      />
     </section>
   );
 }

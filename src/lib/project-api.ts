@@ -120,3 +120,12 @@ export function updateProject(projectId: string, payload: UpdateProjectInput) {
     body: JSON.stringify(body),
   });
 }
+
+export function updateProjectStatus(projectId: string, status: ProjectStatus) {
+  return apiFetch<ApiResponse<Project>>(`/projects/${projectId}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      status,
+    }),
+  });
+}
