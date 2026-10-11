@@ -1,11 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+
+import { ArrowLeft, Pencil } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+
 import ProjectStatusBadge from "@/components/project/project-status-badge";
+
 import ProjectListSkeleton from "@/components/project/project-list-skeleton";
+
 import { useProject } from "@/hooks/use-project";
 
 interface ProjectDetailsClientProps {
@@ -46,15 +50,27 @@ export default function ProjectDetailsClient({
 
   return (
     <section className="space-y-6">
-      <Button
-        nativeButton={false}
-        render={<Link href="/manager/projects" />}
-        variant="outline"
-      >
-        <ArrowLeft className="size-4" />
-        Back to Projects
-      </Button>
+      {/* Navigation */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Button
+          nativeButton={false}
+          render={<Link href="/manager/projects" />}
+          variant="outline"
+        >
+          <ArrowLeft className="size-4" />
+          Back to Projects
+        </Button>
 
+        <Button
+          nativeButton={false}
+          render={<Link href={`/manager/projects/${project.id}/edit`} />}
+        >
+          <Pencil className="size-4" />
+          Edit Project
+        </Button>
+      </div>
+
+      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold">{project.name}</h1>
@@ -67,6 +83,7 @@ export default function ProjectDetailsClient({
         <ProjectStatusBadge status={project.status} />
       </div>
 
+      {/* Information */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-lg border p-5">
           <p className="text-sm text-muted-foreground">Organization</p>
@@ -99,6 +116,7 @@ export default function ProjectDetailsClient({
         </div>
       </div>
 
+      {/* Dates */}
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-lg border p-5">
           <p className="text-sm text-muted-foreground">Start Date</p>

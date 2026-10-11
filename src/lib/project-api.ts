@@ -8,7 +8,10 @@ import type {
   ProjectStatus,
 } from "@/types/project";
 
-import type { CreateProjectInput } from "@/lib/validations/project";
+import type {
+  CreateProjectInput,
+  UpdateProjectInput,
+} from "@/lib/validations/project";
 
 export interface ProjectQueryParams {
   page?: number;
@@ -73,6 +76,7 @@ export function getProjectById(projectId: string) {
 export function createProject(payload: CreateProjectInput) {
   const body = {
     name: payload.name,
+
     description: payload.description || undefined,
 
     organizationId: payload.organizationId,
@@ -90,6 +94,29 @@ export function createProject(payload: CreateProjectInput) {
 
   return apiFetch<ApiResponse<Project>>("/projects", {
     method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function updateProject(projectId: string, payload: UpdateProjectInput) {
+  const body = {
+    name: payload.name,
+
+    description: payload.description || undefined,
+
+    teamId: payload.teamId,
+
+    startDate: payload.startDate
+      ? new Date(`${payload.startDate}T00:00:00.000Z`).toISOString()
+      : undefined,
+
+    endDate: payload.endDate
+      ? new Date(`${payload.endDate}T00:00:00.000Z`).toISOString()
+      : undefined,
+  };
+
+  return apiFetch<ApiResponse<Project>>(`/projects/${projectId}`, {
+    method: "PATCH",
     body: JSON.stringify(body),
   });
 }
