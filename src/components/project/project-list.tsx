@@ -1,4 +1,7 @@
+import { FolderOpen } from "lucide-react";
+
 import ProjectCard from "@/components/project/project-card";
+
 import type { Project } from "@/types/project";
 
 interface ProjectListProps {
@@ -9,10 +12,12 @@ export default function ProjectList({ projects }: ProjectListProps) {
   if (projects.length === 0) {
     return (
       <div className="rounded-lg border border-dashed p-10 text-center">
-        <h2 className="text-lg font-semibold">No projects found</h2>
+        <FolderOpen className="mx-auto size-10 text-muted-foreground" />
+
+        <h3 className="mt-4 font-semibold">No projects found</h3>
 
         <p className="mt-2 text-sm text-muted-foreground">
-          Create your first project to start managing work.
+          Try changing your search, filter, or pagination.
         </p>
       </div>
     );
