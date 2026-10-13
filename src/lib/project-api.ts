@@ -124,8 +124,15 @@ export function updateProject(projectId: string, payload: UpdateProjectInput) {
 export function updateProjectStatus(projectId: string, status: ProjectStatus) {
   return apiFetch<ApiResponse<Project>>(`/projects/${projectId}/status`, {
     method: "PATCH",
+
     body: JSON.stringify({
       status,
     }),
+  });
+}
+
+export function deleteProject(projectId: string) {
+  return apiFetch<ApiResponse<Project>>(`/projects/${projectId}`, {
+    method: "DELETE",
   });
 }

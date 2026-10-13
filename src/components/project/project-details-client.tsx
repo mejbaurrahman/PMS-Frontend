@@ -6,11 +6,13 @@ import { ArrowLeft, Pencil } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
+import DeleteProjectButton from "@/components/project/delete-project-button";
+
+import ProjectListSkeleton from "@/components/project/project-list-skeleton";
+
 import ProjectStatusBadge from "@/components/project/project-status-badge";
 
 import ProjectStatusControl from "@/components/project/project-status-control";
-
-import ProjectListSkeleton from "@/components/project/project-list-skeleton";
 
 import { useProject } from "@/hooks/use-project";
 
@@ -52,7 +54,7 @@ export default function ProjectDetailsClient({
 
   return (
     <section className="space-y-6">
-      {/* Navigation */}
+      {/* Top Actions */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Button
           nativeButton={false}
@@ -63,13 +65,15 @@ export default function ProjectDetailsClient({
           Back to Projects
         </Button>
 
-        <Button
-          nativeButton={false}
-          render={<Link href={`/manager/projects/${project.id}/edit`} />}
-        >
-          <Pencil className="size-4" />
-          Edit Project
-        </Button>
+        <div className="flex flex-wrap gap-3">
+          <Button
+            nativeButton={false}
+            render={<Link href={`/manager/projects/${project.id}/edit`} />}
+          >
+            <Pencil className="size-4" />
+            Edit Project
+          </Button>
+        </div>
       </div>
 
       {/* Header */}
@@ -141,11 +145,27 @@ export default function ProjectDetailsClient({
         </div>
       </div>
 
-      {/* Status Update */}
+      {/* Status */}
       <ProjectStatusControl
         projectId={project.id}
         currentStatus={project.status}
       />
+
+      {/* Danger Zone */}
+      <div className="space-y-4 rounded-lg border border-destructive/30 p-5">
+        <div>
+          <h2 className="font-semibold text-destructive">Danger Zone</h2>
+
+          <p className="mt-1 text-sm text-muted-foreground">
+            Delete this project from the active project list.
+          </p>
+        </div>
+
+        <DeleteProjectButton
+          projectId={project.id}
+          projectName={project.name}
+        />
+      </div>
     </section>
   );
 }
