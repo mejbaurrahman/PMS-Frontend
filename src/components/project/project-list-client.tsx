@@ -2,11 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { X } from "lucide-react";
 import { toast } from "sonner";
 
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
 import ProjectList from "@/components/project/project-list";
 import ProjectListSkeleton from "@/components/project/project-list-skeleton";
+
 import { useProjects } from "@/hooks/use-projects";
 import { useDebounce } from "@/hooks/use-debounce";
 
@@ -16,6 +20,7 @@ import type { ProjectQueryParams } from "@/lib/project-api";
 
 export default function ProjectListClient() {
   const router = useRouter();
+
   const searchParams = useSearchParams();
 
   const page = Number(searchParams.get("page")) || 1;
@@ -39,9 +44,13 @@ export default function ProjectListClient() {
   const { data, isLoading, isError, error } = useProjects({
     page,
     limit: 10,
+
     search: searchFromUrl || undefined,
+
     status: statusFromUrl || undefined,
+
     sortBy: sortByFromUrl,
+
     sortOrder: sortOrderFromUrl,
   });
 
@@ -70,7 +79,7 @@ export default function ProjectListClient() {
   useEffect(() => {
     if (isError) {
       toast.error(
-        error instanceof Error ? error.message : "Unable to load projects",
+        error instanceof Error ? error.message : "Unable to load projects.",
       );
     }
   }, [isError, error]);
@@ -97,7 +106,9 @@ export default function ProjectListClient() {
     const params = new URLSearchParams(searchParams.toString());
 
     params.set("sortBy", sortBy);
+
     params.set("sortOrder", sortOrder);
+
     params.set("page", "1");
 
     router.push(`/manager/projects?${params.toString()}`);
@@ -111,6 +122,19 @@ export default function ProjectListClient() {
     router.push(`/manager/projects?${params.toString()}`);
   };
 
+  const handleClearFilters = () => {
+    setSearch("");
+
+    router.push("/manager/projects?page=1");
+  };
+
+  const hasActiveFilters = Boolean(
+    searchFromUrl ||
+    statusFromUrl ||
+    searchParams.get("sortBy") ||
+    searchParams.get("sortOrder"),
+  );
+
   if (isLoading) {
     return <ProjectListSkeleton />;
   }
@@ -123,10 +147,13 @@ export default function ProjectListClient() {
     );
   }
 
+  const totalProjects = data?.meta.total ?? 0;
+
   return (
     <div className="space-y-6">
       {/* Search + Filters */}
       <div className="flex flex-col gap-3 lg:flex-row">
+        {/* Search */}
         <div className="w-full lg:max-w-sm">
           <Input
             type="search"
@@ -136,7 +163,7 @@ export default function ProjectListClient() {
           />
         </div>
 
-        {/* Status Filter */}
+        {/* Status */}
         <select
           value={statusFromUrl ?? ""}
           onChange={handleStatusChange}
@@ -155,7 +182,7 @@ export default function ProjectListClient() {
           <option value="ARCHIVED">Archived</option>
         </select>
 
-        {/* Sort */}
+        {/* Sorting */}
         <select
           value={`${sortByFromUrl}:${sortOrderFromUrl}`}
           onChange={handleSortChange}
@@ -177,33 +204,53 @@ export default function ProjectListClient() {
         </select>
       </div>
 
+      {/* Result Summary */}
+      <div className="flex flex-col gap-3 rounded-lg border bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold text-foreground">{totalProjects}</span>{" "}
+          {totalProjects === 1 ? "project" : "projects"} found
+        </p>
+
+        {hasActiveFilters && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleClearFilters}
+          >
+            <X className="size-4" />
+            Clear Filters
+          </Button>
+        )}
+      </div>
+
       {/* Project List */}
       <ProjectList projects={data?.data ?? []} />
 
       {/* Pagination */}
       {data && data.meta.totalPages > 1 && (
         <div className="flex items-center justify-between gap-4">
-          <button
+          <Button
             type="button"
+            variant="outline"
             disabled={page <= 1}
             onClick={() => handlePageChange(page - 1)}
-            className="rounded-md border px-4 py-2 text-sm transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
           >
             Previous
-          </button>
+          </Button>
 
           <p className="text-sm text-muted-foreground">
             Page {data.meta.page} of {data.meta.totalPages}
           </p>
 
-          <button
+          <Button
             type="button"
+            variant="outline"
             disabled={page >= data.meta.totalPages}
             onClick={() => handlePageChange(page + 1)}
-            className="rounded-md border px-4 py-2 text-sm transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
           >
             Next
-          </button>
+          </Button>
         </div>
       )}
     </div>
