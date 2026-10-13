@@ -1,7 +1,4 @@
-import Link from "next/link";
-import { Plus } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
+import CreateProjectButton from "@/components/project/create-project-button";
 
 import ProjectListClient from "@/components/project/project-list-client";
 
@@ -17,13 +14,7 @@ export default function ManagerProjectsPage() {
           </p>
         </div>
 
-        <Button
-          nativeButton={false}
-          render={<Link href="/manager/projects/new" />}
-        >
-          <Plus className="size-4" />
-          Create Project
-        </Button>
+        <CreateProjectButton />
       </div>
 
       <ProjectListClient />

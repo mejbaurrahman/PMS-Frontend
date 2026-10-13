@@ -16,6 +16,14 @@ import ProjectStatusControl from "@/components/project/project-status-control";
 
 import { useProject } from "@/hooks/use-project";
 
+import { useAuth } from "@/hooks/use-auth";
+
+import {
+  canDeleteProject,
+  canEditProject,
+  canUpdateProjectStatus,
+} from "@/lib/permissions";
+
 interface ProjectDetailsClientProps {
   projectId: string;
 }
@@ -25,7 +33,9 @@ export default function ProjectDetailsClient({
 }: ProjectDetailsClientProps) {
   const { data, isLoading, isError, error } = useProject(projectId);
 
-  if (isLoading) {
+  const { data: authResponse, isLoading: authLoading } = useAuth();
+
+  if (isLoading || authLoading) {
     return <ProjectListSkeleton />;
   }
 
@@ -52,6 +62,14 @@ export default function ProjectDetailsClient({
 
   const project = data.data;
 
+  const userRole = authResponse?.data?.role;
+
+  const canEdit = canEditProject(userRole);
+
+  const canDelete = canDeleteProject(userRole);
+
+  const canChangeStatus = canUpdateProjectStatus(userRole);
+
   return (
     <section className="space-y-6">
       {/* Top Actions */}
@@ -65,7 +83,7 @@ export default function ProjectDetailsClient({
           Back to Projects
         </Button>
 
-        <div className="flex flex-wrap gap-3">
+        {canEdit && (
           <Button
             nativeButton={false}
             render={<Link href={`/manager/projects/${project.id}/edit`} />}
@@ -73,7 +91,7 @@ export default function ProjectDetailsClient({
             <Pencil className="size-4" />
             Edit Project
           </Button>
-        </div>
+        )}
       </div>
 
       {/* Header */}
@@ -145,27 +163,43 @@ export default function ProjectDetailsClient({
         </div>
       </div>
 
-      {/* Status */}
-      <ProjectStatusControl
-        projectId={project.id}
-        currentStatus={project.status}
-      />
+      {/* Status Management */}
+      {canChangeStatus && (
+        <ProjectStatusControl
+          projectId={project.id}
+          currentStatus={project.status}
+        />
+      )}
 
-      {/* Danger Zone */}
-      <div className="space-y-4 rounded-lg border border-destructive/30 p-5">
-        <div>
-          <h2 className="font-semibold text-destructive">Danger Zone</h2>
+      {/* Read-only Message */}
+      {!canEdit && !canChangeStatus && !canDelete && (
+        <div className="rounded-lg border bg-muted/30 p-5">
+          <p className="font-medium">Read-only access</p>
 
           <p className="mt-1 text-sm text-muted-foreground">
-            Delete this project from the active project list.
+            You can view this project, but you do not have permission to manage
+            it.
           </p>
         </div>
+      )}
 
-        <DeleteProjectButton
-          projectId={project.id}
-          projectName={project.name}
-        />
-      </div>
+      {/* Danger Zone */}
+      {canDelete && (
+        <div className="space-y-4 rounded-lg border border-destructive/30 p-5">
+          <div>
+            <h2 className="font-semibold text-destructive">Danger Zone</h2>
+
+            <p className="mt-1 text-sm text-muted-foreground">
+              Delete this project from the active project list.
+            </p>
+          </div>
+
+          <DeleteProjectButton
+            projectId={project.id}
+            projectName={project.name}
+          />
+        </div>
+      )}
     </section>
   );
 }
