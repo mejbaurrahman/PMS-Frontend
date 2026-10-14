@@ -57,6 +57,12 @@ export const updateSprintSchema = z
     },
   );
 
+export const updateSprintStatusSchema = z.object({
+  status: z.enum(["PLANNED", "ACTIVE", "COMPLETED", "CANCELLED"]),
+});
+
 export type CreateSprintInput = z.infer<typeof createSprintSchema>;
 
 export type UpdateSprintInput = z.infer<typeof updateSprintSchema>;
+
+export type UpdateSprintStatusInput = z.infer<typeof updateSprintStatusSchema>;

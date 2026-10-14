@@ -16,6 +16,8 @@ import SprintDetailsSkeleton from "@/components/sprint/sprint-details-skeleton";
 
 import SprintStatusBadge from "@/components/sprint/sprint-status-badge";
 
+import SprintStatusControl from "@/components/sprint/sprint-status-control";
+
 import { useSprint } from "@/hooks/use-sprint";
 
 import { useAuth } from "@/hooks/use-auth";
@@ -176,12 +178,22 @@ export default function SprintDetailsClient({
         </div>
       </div>
 
+      {/* Status Management */}
+      {canManage && (
+        <SprintStatusControl
+          sprintId={sprint.id}
+          currentStatus={sprint.status}
+        />
+      )}
+
+      {/* Read-only */}
       {!canManage && (
         <div className="rounded-lg border bg-muted/30 p-5">
           <p className="font-medium">Read-only access</p>
 
           <p className="mt-1 text-sm text-muted-foreground">
-            You can view this Sprint, but you do not have permission to edit it.
+            You can view this Sprint, but you do not have permission to manage
+            it.
           </p>
         </div>
       )}
