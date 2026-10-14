@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 
-import { ArrowLeft, CalendarDays, FolderKanban, ListTodo } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarDays,
+  FolderKanban,
+  ListTodo,
+  Pencil,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -11,6 +17,10 @@ import SprintDetailsSkeleton from "@/components/sprint/sprint-details-skeleton";
 import SprintStatusBadge from "@/components/sprint/sprint-status-badge";
 
 import { useSprint } from "@/hooks/use-sprint";
+
+import { useAuth } from "@/hooks/use-auth";
+
+import { canManageProjects } from "@/lib/permissions";
 
 interface SprintDetailsClientProps {
   sprintId: string;
@@ -29,7 +39,9 @@ export default function SprintDetailsClient({
 }: SprintDetailsClientProps) {
   const { data, isLoading, isError, error, refetch } = useSprint(sprintId);
 
-  if (isLoading) {
+  const { data: authResponse, isLoading: authLoading } = useAuth();
+
+  if (isLoading || authLoading) {
     return <SprintDetailsSkeleton />;
   }
 
@@ -69,17 +81,33 @@ export default function SprintDetailsClient({
 
   const sprint = data.data;
 
+  const userRole = authResponse?.data?.role;
+
+  const canManage = canManageProjects(userRole);
+
   return (
     <section className="space-y-6">
       {/* Navigation */}
-      <Button
-        nativeButton={false}
-        render={<Link href="/manager/sprints" />}
-        variant="outline"
-      >
-        <ArrowLeft className="size-4" />
-        Back to Sprints
-      </Button>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Button
+          nativeButton={false}
+          render={<Link href="/manager/sprints" />}
+          variant="outline"
+        >
+          <ArrowLeft className="size-4" />
+          Back to Sprints
+        </Button>
+
+        {canManage && (
+          <Button
+            nativeButton={false}
+            render={<Link href={`/manager/sprints/${sprint.id}/edit`} />}
+          >
+            <Pencil className="size-4" />
+            Edit Sprint
+          </Button>
+        )}
+      </div>
 
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -96,7 +124,6 @@ export default function SprintDetailsClient({
 
       {/* Summary */}
       <div className="grid gap-4 md:grid-cols-3">
-        {/* Project */}
         <div className="rounded-lg border p-5">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <FolderKanban className="size-4" />
@@ -108,7 +135,6 @@ export default function SprintDetailsClient({
           </p>
         </div>
 
-        {/* Tasks */}
         <div className="rounded-lg border p-5">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <ListTodo className="size-4" />
@@ -120,7 +146,6 @@ export default function SprintDetailsClient({
           </p>
         </div>
 
-        {/* Status */}
         <div className="rounded-lg border p-5">
           <p className="text-sm text-muted-foreground">Status</p>
 
@@ -150,6 +175,16 @@ export default function SprintDetailsClient({
           <p className="mt-2 font-medium">{formatDate(sprint.endDate)}</p>
         </div>
       </div>
+
+      {!canManage && (
+        <div className="rounded-lg border bg-muted/30 p-5">
+          <p className="font-medium">Read-only access</p>
+
+          <p className="mt-1 text-sm text-muted-foreground">
+            You can view this Sprint, but you do not have permission to edit it.
+          </p>
+        </div>
+      )}
     </section>
   );
 }

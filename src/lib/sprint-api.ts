@@ -6,7 +6,10 @@ import type {
   SprintStatus,
 } from "@/types/sprint";
 
-import type { CreateSprintInput } from "@/lib/validations/sprint";
+import type {
+  CreateSprintInput,
+  UpdateSprintInput,
+} from "@/lib/validations/sprint";
 
 export interface SprintQueryParams {
   projectId?: string;
@@ -49,6 +52,29 @@ export function createSprint(payload: CreateSprintInput) {
 
   return apiFetch<SprintResponse>("/sprints", {
     method: "POST",
+
+    body: JSON.stringify(body),
+  });
+}
+
+export function updateSprint(sprintId: string, payload: UpdateSprintInput) {
+  const body = {
+    name: payload.name,
+
+    description: payload.description || undefined,
+
+    startDate: payload.startDate
+      ? new Date(`${payload.startDate}T00:00:00.000Z`).toISOString()
+      : undefined,
+
+    endDate: payload.endDate
+      ? new Date(`${payload.endDate}T00:00:00.000Z`).toISOString()
+      : undefined,
+  };
+
+  return apiFetch<SprintResponse>(`/sprints/${sprintId}`, {
+    method: "PATCH",
+
     body: JSON.stringify(body),
   });
 }
