@@ -6,6 +6,8 @@ import type {
   SprintStatus,
 } from "@/types/sprint";
 
+import type { CreateSprintInput } from "@/lib/validations/sprint";
+
 export interface SprintQueryParams {
   projectId?: string;
 
@@ -30,4 +32,23 @@ export function getSprints(params: SprintQueryParams = {}) {
 
 export function getSprintById(sprintId: string) {
   return apiFetch<SprintResponse>(`/sprints/${sprintId}`);
+}
+
+export function createSprint(payload: CreateSprintInput) {
+  const body = {
+    name: payload.name,
+
+    description: payload.description || undefined,
+
+    projectId: payload.projectId,
+
+    startDate: new Date(`${payload.startDate}T00:00:00.000Z`).toISOString(),
+
+    endDate: new Date(`${payload.endDate}T00:00:00.000Z`).toISOString(),
+  };
+
+  return apiFetch<SprintResponse>("/sprints", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
 }
