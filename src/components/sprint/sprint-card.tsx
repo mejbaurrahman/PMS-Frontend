@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { CalendarDays, FolderKanban, ListTodo } from "lucide-react";
 
 import SprintStatusBadge from "@/components/sprint/sprint-status-badge";
@@ -18,11 +20,16 @@ function formatDate(date: string | null) {
 
 export default function SprintCard({ sprint }: SprintCardProps) {
   return (
-    <article className="rounded-lg border bg-card p-5 transition-shadow hover:shadow-md">
+    <article className="rounded-lg border bg-card p-5 transition-all hover:-translate-y-0.5 hover:shadow-md">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h2 className="truncate text-lg font-semibold">{sprint.name}</h2>
+          <Link
+            href={`/manager/sprints/${sprint.id}`}
+            className="hover:underline"
+          >
+            <h2 className="truncate text-lg font-semibold">{sprint.name}</h2>
+          </Link>
 
           <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
             {sprint.description || "No description available."}

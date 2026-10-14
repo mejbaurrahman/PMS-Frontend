@@ -1,6 +1,10 @@
 import { apiFetch } from "@/lib/api";
 
-import type { SprintListResponse, SprintStatus } from "@/types/sprint";
+import type {
+  SprintListResponse,
+  SprintResponse,
+  SprintStatus,
+} from "@/types/sprint";
 
 export interface SprintQueryParams {
   projectId?: string;
@@ -22,4 +26,8 @@ export function getSprints(params: SprintQueryParams = {}) {
   const query = searchParams.toString();
 
   return apiFetch<SprintListResponse>(`/sprints${query ? `?${query}` : ""}`);
+}
+
+export function getSprintById(sprintId: string) {
+  return apiFetch<SprintResponse>(`/sprints/${sprintId}`);
 }

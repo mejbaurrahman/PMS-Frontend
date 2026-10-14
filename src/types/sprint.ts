@@ -2,9 +2,13 @@ export type SprintStatus = "PLANNED" | "ACTIVE" | "COMPLETED" | "CANCELLED";
 
 export interface SprintProject {
   id: string;
+
   name: string;
+
   status: string;
+
   organizationId: string;
+
   teamId: string;
 }
 
@@ -44,4 +48,14 @@ export interface SprintListResponse {
   message: string;
 
   data: Sprint[];
+}
+
+export interface SprintResponse {
+  success: boolean;
+
+  statusCode: number;
+
+  message: string;
+
+  data: Sprint;
 }
