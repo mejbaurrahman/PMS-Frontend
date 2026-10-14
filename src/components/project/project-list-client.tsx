@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { X } from "lucide-react";
+import { Loader2, Search, SlidersHorizontal, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -41,7 +41,7 @@ export default function ProjectListClient() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  const { data, isLoading, isError, error } = useProjects({
+  const { data, isLoading, isFetching, isError, error } = useProjects({
     page,
     limit: 10,
 
@@ -65,8 +65,10 @@ export default function ProjectListClient() {
 
     const params = new URLSearchParams(searchParams.toString());
 
-    if (debouncedSearch.trim()) {
-      params.set("search", debouncedSearch.trim());
+    const cleanSearch = debouncedSearch.trim();
+
+    if (cleanSearch) {
+      params.set("search", cleanSearch);
     } else {
       params.delete("search");
     }
@@ -77,11 +79,13 @@ export default function ProjectListClient() {
   }, [debouncedSearch, router, searchFromUrl, searchParams]);
 
   useEffect(() => {
-    if (isError) {
-      toast.error(
-        error instanceof Error ? error.message : "Unable to load projects.",
-      );
+    if (!isError) {
+      return;
     }
+
+    toast.error(
+      error instanceof Error ? error.message : "Unable to load projects.",
+    );
   }, [isError, error]);
 
   const handleStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -151,57 +155,82 @@ export default function ProjectListClient() {
 
   return (
     <div className="space-y-6">
-      {/* Search + Filters */}
-      <div className="flex flex-col gap-3 lg:flex-row">
-        {/* Search */}
-        <div className="w-full lg:max-w-sm">
-          <Input
-            type="search"
-            placeholder="Search projects..."
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-          />
+      {/* Toolbar */}
+      <div className="rounded-lg border p-4">
+        <div className="mb-4 flex items-center gap-2">
+          <SlidersHorizontal className="size-4 text-muted-foreground" />
+
+          <h2 className="text-sm font-semibold">Search & Filters</h2>
         </div>
 
-        {/* Status */}
-        <select
-          value={statusFromUrl ?? ""}
-          onChange={handleStatusChange}
-          className="h-10 rounded-md border bg-background px-3 text-sm"
-        >
-          <option value="">All Statuses</option>
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_180px_200px_auto]">
+          {/* Search */}
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
 
-          <option value="PLANNING">Planning</option>
+            <Input
+              type="search"
+              placeholder="Search projects..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              className="pl-9"
+            />
+          </div>
 
-          <option value="ACTIVE">Active</option>
+          {/* Status */}
+          <select
+            value={statusFromUrl ?? ""}
+            onChange={handleStatusChange}
+            disabled={isFetching}
+            className="h-10 w-full rounded-md border bg-background px-3 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="">All Statuses</option>
 
-          <option value="ON_HOLD">On Hold</option>
+            <option value="PLANNING">Planning</option>
 
-          <option value="COMPLETED">Completed</option>
+            <option value="ACTIVE">Active</option>
 
-          <option value="ARCHIVED">Archived</option>
-        </select>
+            <option value="ON_HOLD">On Hold</option>
 
-        {/* Sorting */}
-        <select
-          value={`${sortByFromUrl}:${sortOrderFromUrl}`}
-          onChange={handleSortChange}
-          className="h-10 rounded-md border bg-background px-3 text-sm"
-        >
-          <option value="createdAt:desc">Newest First</option>
+            <option value="COMPLETED">Completed</option>
 
-          <option value="createdAt:asc">Oldest First</option>
+            <option value="ARCHIVED">Archived</option>
+          </select>
 
-          <option value="name:asc">Name A-Z</option>
+          {/* Sort */}
+          <select
+            value={`${sortByFromUrl}:${sortOrderFromUrl}`}
+            onChange={handleSortChange}
+            disabled={isFetching}
+            className="h-10 w-full rounded-md border bg-background px-3 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="createdAt:desc">Newest First</option>
 
-          <option value="name:desc">Name Z-A</option>
+            <option value="createdAt:asc">Oldest First</option>
 
-          <option value="updatedAt:desc">Recently Updated</option>
+            <option value="name:asc">Name A-Z</option>
 
-          <option value="startDate:asc">Start Date</option>
+            <option value="name:desc">Name Z-A</option>
 
-          <option value="endDate:asc">End Date</option>
-        </select>
+            <option value="updatedAt:desc">Recently Updated</option>
+
+            <option value="startDate:asc">Start Date</option>
+
+            <option value="endDate:asc">End Date</option>
+          </select>
+
+          {/* Clear */}
+          <Button
+            type="button"
+            variant="outline"
+            disabled={!hasActiveFilters || isFetching}
+            onClick={handleClearFilters}
+            className="w-full xl:w-auto"
+          >
+            <X className="size-4" />
+            Clear
+          </Button>
+        </div>
       </div>
 
       {/* Result Summary */}
@@ -211,42 +240,52 @@ export default function ProjectListClient() {
           {totalProjects === 1 ? "project" : "projects"} found
         </p>
 
-        {hasActiveFilters && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleClearFilters}
-          >
-            <X className="size-4" />
-            Clear Filters
-          </Button>
+        {isFetching && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="size-4 animate-spin" />
+            Updating results...
+          </div>
         )}
       </div>
 
-      {/* Project List */}
-      <ProjectList projects={data?.data ?? []} />
+      {/* Results */}
+      <div
+        className={
+          isFetching ? "opacity-60 transition-opacity" : "transition-opacity"
+        }
+      >
+        <ProjectList projects={data?.data ?? []} />
+      </div>
 
       {/* Pagination */}
       {data && data.meta.totalPages > 1 && (
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <Button
             type="button"
             variant="outline"
-            disabled={page <= 1}
+            disabled={page <= 1 || isFetching}
             onClick={() => handlePageChange(page - 1)}
           >
             Previous
           </Button>
 
-          <p className="text-sm text-muted-foreground">
-            Page {data.meta.page} of {data.meta.totalPages}
-          </p>
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">
+              Page{" "}
+              <span className="font-medium text-foreground">
+                {data.meta.page}
+              </span>{" "}
+              of{" "}
+              <span className="font-medium text-foreground">
+                {data.meta.totalPages}
+              </span>
+            </p>
+          </div>
 
           <Button
             type="button"
             variant="outline"
-            disabled={page >= data.meta.totalPages}
+            disabled={page >= data.meta.totalPages || isFetching}
             onClick={() => handlePageChange(page + 1)}
           >
             Next

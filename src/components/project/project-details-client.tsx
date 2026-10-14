@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 
 import DeleteProjectButton from "@/components/project/delete-project-button";
 
-import ProjectListSkeleton from "@/components/project/project-list-skeleton";
+import ProjectDetailsSkeleton from "@/components/project/project-details-skeleton";
+
+import ProjectErrorState from "@/components/project/project-error-state";
 
 import ProjectStatusBadge from "@/components/project/project-status-badge";
 
@@ -31,32 +33,24 @@ interface ProjectDetailsClientProps {
 export default function ProjectDetailsClient({
   projectId,
 }: ProjectDetailsClientProps) {
-  const { data, isLoading, isError, error } = useProject(projectId);
+  const { data, isLoading, isError, error, refetch } = useProject(projectId);
 
   const { data: authResponse, isLoading: authLoading } = useAuth();
 
   if (isLoading || authLoading) {
-    return <ProjectListSkeleton />;
+    return <ProjectDetailsSkeleton />;
   }
 
   if (isError || !data?.data) {
     return (
-      <div className="space-y-4">
-        <Button
-          nativeButton={false}
-          render={<Link href="/manager/projects" />}
-          variant="outline"
-        >
-          <ArrowLeft className="size-4" />
-          Back to Projects
-        </Button>
-
-        <div className="rounded-lg border border-destructive/30 p-6 text-center">
-          <p className="text-sm text-destructive">
-            {error instanceof Error ? error.message : "Unable to load project."}
-          </p>
-        </div>
-      </div>
+      <ProjectErrorState
+        message={
+          error instanceof Error ? error.message : "Unable to load project."
+        }
+        onRetry={() => {
+          void refetch();
+        }}
+      />
     );
   }
 
@@ -107,7 +101,7 @@ export default function ProjectDetailsClient({
         <ProjectStatusBadge status={project.status} />
       </div>
 
-      {/* Information */}
+      {/* Summary */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-lg border p-5">
           <p className="text-sm text-muted-foreground">Organization</p>
@@ -132,11 +126,9 @@ export default function ProjectDetailsClient({
         </div>
 
         <div className="rounded-lg border p-5">
-          <p className="text-sm text-muted-foreground">Status</p>
+          <p className="text-sm text-muted-foreground">Sprints</p>
 
-          <div className="mt-2">
-            <ProjectStatusBadge status={project.status} />
-          </div>
+          <p className="mt-1 font-medium">{project._count?.sprints ?? 0}</p>
         </div>
       </div>
 
@@ -163,7 +155,7 @@ export default function ProjectDetailsClient({
         </div>
       </div>
 
-      {/* Status Management */}
+      {/* Status */}
       {canChangeStatus && (
         <ProjectStatusControl
           projectId={project.id}
@@ -171,7 +163,7 @@ export default function ProjectDetailsClient({
         />
       )}
 
-      {/* Read-only Message */}
+      {/* Read Only */}
       {!canEdit && !canChangeStatus && !canDelete && (
         <div className="rounded-lg border bg-muted/30 p-5">
           <p className="font-medium">Read-only access</p>
