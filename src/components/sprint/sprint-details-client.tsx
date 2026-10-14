@@ -12,6 +12,8 @@ import {
 
 import { Button } from "@/components/ui/button";
 
+import DeleteSprintButton from "@/components/sprint/delete-sprint-button";
+
 import SprintDetailsSkeleton from "@/components/sprint/sprint-details-skeleton";
 
 import SprintStatusBadge from "@/components/sprint/sprint-status-badge";
@@ -192,9 +194,24 @@ export default function SprintDetailsClient({
           <p className="font-medium">Read-only access</p>
 
           <p className="mt-1 text-sm text-muted-foreground">
-            You can view this Sprint, but you do not have permission to manage
+            You can view this sprint, but you do not have permission to manage
             it.
           </p>
+        </div>
+      )}
+
+      {/* Danger Zone */}
+      {canManage && (
+        <div className="space-y-4 rounded-lg border border-destructive/30 p-5">
+          <div>
+            <h2 className="font-semibold text-destructive">Danger Zone</h2>
+
+            <p className="mt-1 text-sm text-muted-foreground">
+              Delete this sprint from the project.
+            </p>
+          </div>
+
+          <DeleteSprintButton sprintId={sprint.id} sprintName={sprint.name} />
         </div>
       )}
     </section>

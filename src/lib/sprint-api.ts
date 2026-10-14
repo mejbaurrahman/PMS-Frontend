@@ -52,6 +52,7 @@ export function createSprint(payload: CreateSprintInput) {
 
   return apiFetch<SprintResponse>("/sprints", {
     method: "POST",
+
     body: JSON.stringify(body),
   });
 }
@@ -73,6 +74,7 @@ export function updateSprint(sprintId: string, payload: UpdateSprintInput) {
 
   return apiFetch<SprintResponse>(`/sprints/${sprintId}`, {
     method: "PATCH",
+
     body: JSON.stringify(body),
   });
 }
@@ -84,5 +86,11 @@ export function updateSprintStatus(sprintId: string, status: SprintStatus) {
     body: JSON.stringify({
       status,
     }),
+  });
+}
+
+export function deleteSprint(sprintId: string) {
+  return apiFetch<SprintResponse>(`/sprints/${sprintId}`, {
+    method: "DELETE",
   });
 }
